@@ -38,11 +38,11 @@ def _dbc_function(func, self=None, additional=None):
         for line in _getLinesStartingWith("pre:", func.func_doc):
             if name == "__init__":
                 raise AttributeError("__init__ must not have preconditions or postconditions")
-            func.__pres__.append(compile(line, "<string>", "eval"))
+            func.__pres__.append(line)
         for line in _getLinesStartingWith("post:", func.func_doc):
             if name == "__init__":
                 raise AttributeError("__init__ must not have preconditions or postconditions")
-            func.__posts__.append(compile(line, "<string>", "eval"))
+            func.__posts__.append(line)
 
     @wraps(func)
     def dbc_wrapper(*args, **kwargs):
@@ -103,9 +103,9 @@ def _dbc_class(cls):
         for c in inspect.getmro(self.__class__):
             if c.__doc__:
                 for line in _getLinesStartingWith("hinv:", c.__doc__):
-                    self.__invariants__.append(compile(line, "<string>", "eval"))
+                    self.__invariants__.append(line)
                 for line in _getLinesStartingWith("sinv:", c.__doc__):
-                    soft_invariants.append(compile(line, "<string>", "eval"))
+                    soft_invariants.append(line)
 
         # initialize preconditions and postconditions
         for name, _ in inspect.getmembers(self, inspect.ismethod):
