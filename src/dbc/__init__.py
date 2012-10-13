@@ -1,3 +1,4 @@
+from __future__ import print_function
 import inspect
 from functools import wraps
 import copy
