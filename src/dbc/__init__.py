@@ -4,7 +4,7 @@ from functools import wraps
 import copy
 
 
-def _getLinesStartingWith(prefix, lines):
+def __getLinesStartingWith(prefix, lines):
     for line in lines.splitlines():
         line = line.lstrip()
         if line.startswith(prefix):
@@ -19,7 +19,7 @@ class DbcViolation(Exception):
         return "DBC Constraint '%s' violated" % self.con
 
 
-def _dbc_function(func, self=None, additional=None):
+def dbc_function(func, self=None, additional=None):
     if additional is None:
         additional = []
 
@@ -35,11 +35,11 @@ def _dbc_function(func, self=None, additional=None):
     func.__pres__ = copy.copy(additional)
     func.__posts__ = copy.copy(additional)
     if func.func_doc:
-        for line in _getLinesStartingWith("pre:", func.func_doc):
+        for line in __getLinesStartingWith("pre:", func.func_doc):
             if name == "__init__":
                 raise AttributeError("__init__ must not have preconditions or postconditions")
             func.__pres__.append(line)
-        for line in _getLinesStartingWith("post:", func.func_doc):
+        for line in __getLinesStartingWith("post:", func.func_doc):
             if name == "__init__":
                 raise AttributeError("__init__ must not have preconditions or postconditions")
             func.__posts__.append(line)
@@ -72,7 +72,7 @@ def _dbc_function(func, self=None, additional=None):
     return dbc_wrapper
 
 
-def _dbc_class(cls):
+def dbc_class(cls):
     def __setattr__(self, name, value):
         self.__dict__[name] = value
 
@@ -102,15 +102,15 @@ def _dbc_class(cls):
         # initialize invariants from all the way up the MRO
         for c in inspect.getmro(self.__class__):
             if c.__doc__:
-                for line in _getLinesStartingWith("hinv:", c.__doc__):
+                for line in __getLinesStartingWith("hinv:", c.__doc__):
                     self.__invariants__.append(line)
-                for line in _getLinesStartingWith("sinv:", c.__doc__):
+                for line in __getLinesStartingWith("sinv:", c.__doc__):
                     soft_invariants.append(line)
 
         # initialize preconditions and postconditions
         for name, _ in inspect.getmembers(self, inspect.ismethod):
             if name != "__setattr__":
-                setattr(self, name, _dbc_function(getattr(self, name), self, soft_invariants))
+                setattr(self, name, dbc_function(getattr(self, name), self, soft_invariants))
     cls.__init_dbc__ = __init_dbc__
 
     return cls
