@@ -719,7 +719,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(dbc.DbcViolation):
             x.calculate(0)
 
-    def testSort(self):
+    def testSortOk(self):
         @dbc.dbc_function
         def mysort(a):
             """
@@ -727,12 +727,28 @@ class Test(unittest.TestCase):
             post: all(__ret__[i] <= __ret__[i+1] for i in xrange(len(__ret__)-1))
             post: all(a.count(i) == __ret__.count(i) for i in set(a))
             post: len(__ret__) == len(a)
+            post: id(__ret__) != id(a)
             """
             return sorted(a)
 
         self.assertEquals(mysort([4, 3, 1, 2, 1]), [1, 1, 2, 3, 4])
 
-    def testSortInPlace(self):
+    def testSortViolation(self):
+        @dbc.dbc_function
+        def mysort(a):
+            """
+            pre: len(a) >= 0
+            post: all(__ret__[i] <= __ret__[i+1] for i in xrange(len(__ret__)-1))
+            post: all(a.count(i) == __ret__.count(i) for i in set(a))
+            post: len(__ret__) == len(a)
+            post: id(__ret__) != id(a)
+            """
+            return a
+
+        with self.assertRaises(dbc.DbcViolation):
+            mysort([4, 3, 1, 2, 1])
+
+    def testSortInPlaceOk(self):
         @dbc.dbc_function
         def mysort(a):
             """
@@ -742,11 +758,29 @@ class Test(unittest.TestCase):
             post: len(__ret__) == len(__old__["a"])
             post: print(__old__["a"]) == None
             post: print(__ret__) == None
+            post: id(__ret__) == id(a)
             """
             a.sort()
             return a
 
         self.assertEquals(mysort([4, 3, 1, 2, 1]), [1, 1, 2, 3, 4])
+
+    def testSortInPlaceViolation(self):
+        @dbc.dbc_function
+        def mysort(a):
+            """
+            pre: len(a) >= 0
+            post: all(__ret__[i] <= __ret__[i+1] for i in xrange(len(__ret__)-1))
+            post: all(__old__["a"].count(i) == __ret__.count(i) for i in set(__old__["a"]))
+            post: len(__ret__) == len(__old__["a"])
+            post: print(__old__["a"]) == None
+            post: print(__ret__) == None
+            post: id(__ret__) == id(a)
+            """
+            return a
+
+        with self.assertRaises(dbc.DbcViolation):
+            mysort([4, 3, 1, 2, 1])
 
     def testSoftInvariantOk(self):
         @dbc.dbc_class
@@ -780,6 +814,40 @@ class Test(unittest.TestCase):
         with self.assertRaises(dbc.DbcViolation):
             x.change()
 
+    def testMethodCall1(self):
+        @dbc.dbc_class
+        class X:
+            """
+            hinv: self.check()
+            """
+            def __init__(self):
+                self.x = 10
+
+            def check(self):
+                return self.x > 10
+
+        with self.assertRaises(dbc.DbcViolation):
+            x = X()  # @UnusedVariable
+
+    def testMethodCall2(self):
+        @dbc.dbc_class
+        class X:
+            """
+            hinv: self.check()
+            """
+            def __init__(self):
+                self.x = 15
+
+            def check(self):
+                return self.x > 10
+
+        x = X()
+        x.x = 11
+        x.x = 12
+        with self.assertRaises(dbc.DbcViolation):
+            x.x = 10
+        with self.assertRaises(dbc.DbcViolation):
+            x.x = 9
 
 if __name__ == "__main__":
     unittest.main()
