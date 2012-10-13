@@ -740,6 +740,8 @@ class Test(unittest.TestCase):
             post: all(__ret__[i] <= __ret__[i+1] for i in xrange(len(__ret__)-1))
             post: all(__old__["a"].count(i) == __ret__.count(i) for i in set(__old__["a"]))
             post: len(__ret__) == len(__old__["a"])
+            post: print(__old__["a"]) == None
+            post: print(__ret__) == None
             """
             a.sort()
             return a
