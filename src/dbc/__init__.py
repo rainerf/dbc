@@ -61,7 +61,7 @@ def _dbc_function(func, self=None, additional=None):
         a = dict(zip(fa, args))
 
         __check(func.__pres__, a)
-        old = copy.copy(a)
+        old = {k: copy.copy(v) for k, v in a.items()}
         ret = func(*args, **kwargs)
         a["__ret__"] = ret
         a["__old__"] = old
