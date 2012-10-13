@@ -5,12 +5,12 @@ import math
 
 class Test(unittest.TestCase):
     def testAssignmentViolation(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         x = X()
@@ -24,71 +24,71 @@ class Test(unittest.TestCase):
             x.bla = 3
 
     def testInitViolation(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 0
         with self.assertRaises(dbc.DbcViolation):
             x = X()  # @UnusedVariable
 
     def testInitOk(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
                 self.bla = 15
                 self.bla = 6
         x = X()  # @UnusedVariable
 
     def testInvariantsParsed(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
             teststring
-            inv: self.bla > 5 \
+            hinv: self.bla > 5 \
                  and self.bla< 15
             some explanation for the invariant maybe
-            inv: self.bla > 7
+            hinv: self.bla > 7
             more docs
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
         x = X()
         self.assertEqual(len(x.__invariants__), 2)
 
     def testNoInvariants(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
         x = X()
         x.bla = 0
         x.bla = 20
 
     def testNoDocString(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
         x = X()
         x.bla = 0
         x.bla = 20
 
     def testFunctionViolation(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def violate(self):
@@ -99,12 +99,12 @@ class Test(unittest.TestCase):
             x.violate()
 
     def testFunctionViolationByUser(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -122,12 +122,12 @@ class Test(unittest.TestCase):
             x.change(0)
 
     def testReassignViolation(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         x = X()
@@ -139,9 +139,9 @@ class Test(unittest.TestCase):
             x.bla = 5
 
     def testSimplePostViolation(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -155,9 +155,9 @@ class Test(unittest.TestCase):
             x.change(5)
 
     def testPostOk(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -173,9 +173,9 @@ class Test(unittest.TestCase):
         x.change(1)
 
     def testPreOk(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 0
 
             def change(self, value):
@@ -193,9 +193,9 @@ class Test(unittest.TestCase):
         x.change(5)
 
     def testPreViolation(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 0
 
             def change(self, value):
@@ -211,9 +211,9 @@ class Test(unittest.TestCase):
             x.change(6)
 
     def testPreViolationByInit(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -227,36 +227,36 @@ class Test(unittest.TestCase):
             x.change(4)
 
     def testPreInInit(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
                 """
                 pre: self.bla < 5
                 """
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         with self.assertRaises(AttributeError):
             x = X()  # @UnusedVariable
 
     def testPostInInit(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             def __init__(self):
                 """
                 post: self.bla < 5
                 """
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         with self.assertRaises(AttributeError):
             x = X()  # @UnusedVariable
 
     def testInheritance(self):
-        class X(dbc._Dbc):
+        @dbc._dbc_class
+        class X:
             """
-            inv: self.bla < 15
+            hinv: self.bla < 15
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -264,7 +264,7 @@ class Test(unittest.TestCase):
 
         class Y(X):
             """
-            inv: self.blabla < 20
+            hinv: self.blabla < 20
             """
             def __init__(self):
                 X.__init__(self)
@@ -281,12 +281,12 @@ class Test(unittest.TestCase):
             y.change2(25)
 
     def testNewStyleAssignmentViolation(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         x = X()
@@ -300,71 +300,71 @@ class Test(unittest.TestCase):
             x.bla = 3
 
     def testNewStyleInitViolation(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 0
         with self.assertRaises(dbc.DbcViolation):
             x = X()  # @UnusedVariable
 
     def testNewStyleInitOk(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
                 self.bla = 15
                 self.bla = 6
         x = X()  # @UnusedVariable
 
     def testNewStyleInvariantsParsed(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
             teststring
-            inv: self.bla > 5 \
+            hinv: self.bla > 5 \
                  and self.bla< 15
             some explanation for the invariant maybe
-            inv: self.bla > 7
+            hinv: self.bla > 7
             more docs
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
         x = X()
         self.assertEqual(len(x.__invariants__), 2)
 
     def testNewStyleNoInvariants(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
         x = X()
         x.bla = 0
         x.bla = 20
 
     def testNewStyleNoDocString(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
         x = X()
         x.bla = 0
         x.bla = 20
 
     def testNewStyleFunctionViolation(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def violate(self):
@@ -375,12 +375,12 @@ class Test(unittest.TestCase):
             x.violate()
 
     def testNewStyleFunctionViolationByUser(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -398,12 +398,12 @@ class Test(unittest.TestCase):
             x.change(0)
 
     def testNewStyleReassignViolation(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla > 5
+            hinv: self.bla > 5
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         x = X()
@@ -415,9 +415,9 @@ class Test(unittest.TestCase):
             x.bla = 5
 
     def testNewStyleSimplePostViolation(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -431,9 +431,9 @@ class Test(unittest.TestCase):
             x.change(5)
 
     def testNewStylePostOk(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -449,9 +449,9 @@ class Test(unittest.TestCase):
         x.change(1)
 
     def testNewStylePreOk(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 0
 
             def change(self, value):
@@ -469,9 +469,9 @@ class Test(unittest.TestCase):
         x.change(5)
 
     def testNewStylePreViolation(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 0
 
             def change(self, value):
@@ -487,9 +487,9 @@ class Test(unittest.TestCase):
             x.change(6)
 
     def testNewStylePreViolationByInit(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -503,36 +503,36 @@ class Test(unittest.TestCase):
             x.change(4)
 
     def testNewStylePreInInit(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
                 """
                 pre: self.bla < 5
                 """
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         with self.assertRaises(AttributeError):
             x = X()  # @UnusedVariable
 
     def testNewStylePostInInit(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
                 """
                 post: self.bla < 5
                 """
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         with self.assertRaises(AttributeError):
             x = X()  # @UnusedVariable
 
     def testNewStyleInheritance(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla < 15
+            hinv: self.bla < 15
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -540,7 +540,7 @@ class Test(unittest.TestCase):
 
         class Y(X):
             """
-            inv: self.blabla < 20
+            hinv: self.blabla < 20
             """
             def __init__(self):
                 super(Y, self).__init__()
@@ -557,12 +557,12 @@ class Test(unittest.TestCase):
             y.change2(25)
 
     def testNewStyleInheritance2(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla < 15
+            hinv: self.bla < 15
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
             def change(self, value):
@@ -570,7 +570,7 @@ class Test(unittest.TestCase):
 
         class Y(X):
             """
-            inv: self.bla < 12
+            hinv: self.bla < 12
             """
             pass
 
@@ -582,17 +582,17 @@ class Test(unittest.TestCase):
             y.change(12)
 
     def testNewStyleInheritance3(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             """
-            inv: self.bla < 15
+            hinv: self.bla < 15
             """
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.bla = 10
 
         class Y(X):
             """
-            inv: self.bla < 10
+            hinv: self.bla < 10
             """
             pass
 
@@ -601,9 +601,9 @@ class Test(unittest.TestCase):
             y = Y()  # @UnusedVariable
 
     def testComplexPost(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.a = 0
                 self.b = 0
                 self.c = 0
@@ -621,10 +621,8 @@ class Test(unittest.TestCase):
         self.assertEqual(x.c, 5)
 
     def testPostFromParameters(self):
-        class X(dbc._Dbc, object):
-            def __init__(self):
-                dbc._Dbc.__init__(self)
-
+        @dbc._dbc_class
+        class X(object):
             def calculate(self, a, b):
                 """
                 pre: a > 0
@@ -646,9 +644,9 @@ class Test(unittest.TestCase):
         self.assertEqual(x.calculate(3, 4), 5)
 
     def testPostFromParametersOk(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.c = 0
 
             def calculate(self, a, b):
@@ -662,9 +660,9 @@ class Test(unittest.TestCase):
         self.assertEqual(x.c, 5)
 
     def testPostFromParametersViolation(self):
-        class X(dbc._Dbc, object):
+        @dbc._dbc_class
+        class X(object):
             def __init__(self):
-                dbc._Dbc.__init__(self)
                 self.c = 0
 
             def calculate(self, a, b):
@@ -680,7 +678,7 @@ class Test(unittest.TestCase):
         self.assertEqual(x.c, 25)
 
     def testFunction(self):
-        @dbc._dbc_function_wrapper
+        @dbc._dbc_function
         def calculate(a, b):
             """
             pre: a>0 and b>0
@@ -706,7 +704,7 @@ class Test(unittest.TestCase):
             def __init__(self, a):
                 self.a = a
 
-            @dbc._dbc_function_wrapper
+            @dbc._dbc_function
             def calculate(self, b):
                 """
                 pre: b > 0
@@ -720,6 +718,65 @@ class Test(unittest.TestCase):
             x.calculate(-1)
         with self.assertRaises(dbc.DbcViolation):
             x.calculate(0)
+
+    def testSort(self):
+        @dbc._dbc_function
+        def mysort(a):
+            """
+            pre: len(a) >= 0
+            post: all(__ret__[i] <= __ret__[i+1] for i in xrange(len(__ret__)-1))
+            post: all(a.count(i) == __ret__.count(i) for i in set(a))
+            post: len(__ret__) == len(a)
+            """
+            return sorted(a)
+
+        self.assertEquals(mysort([4, 3, 1, 2, 1]), [1, 1, 2, 3, 4])
+
+    def testSortInPlace(self):
+        @dbc._dbc_function
+        def mysort(a):
+            """
+            pre: len(a) >= 0
+            post: all(__ret__[i] <= __ret__[i+1] for i in xrange(len(__ret__)-1))
+            post: all(__old__["a"].count(i) == __ret__.count(i) for i in set(__old__["a"]))
+            post: len(__ret__) == len(__old__["a"])
+            """
+            a.sort()
+            return a
+
+        self.assertEquals(mysort([4, 3, 1, 2, 1]), [1, 1, 2, 3, 4])
+
+    def testSoftInvariantOk(self):
+        @dbc._dbc_class
+        class X:
+            """
+            sinv: self.x >= 0
+            """
+            def __init__(self):
+                self.x = 10
+
+            def change(self):
+                self.x = -10
+                self.x = 10
+
+        x = X()
+        x.change()
+
+    def testSoftInvariantViolation(self):
+        @dbc._dbc_class
+        class X:
+            """
+            sinv: self.x >= 0
+            """
+            def __init__(self):
+                self.x = 10
+
+            def change(self):
+                self.x = -10
+
+        x = X()
+        with self.assertRaises(dbc.DbcViolation):
+            x.change()
 
 
 if __name__ == "__main__":
