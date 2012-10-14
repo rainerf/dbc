@@ -73,10 +73,12 @@ def dbc_function(func, self=None, additional=None):
 
 
 def dbc_class(cls):
+    ####
+    # define and set the new __setattr__
     def __setattr__(self, name, value):
         self.__dict__[name] = value
 
-        if name == "__invariants__":
+        if name in ["__invariants__", "__init__", "__init_dbc__"]:
             return
 
         for i in self.__invariants__:
@@ -85,18 +87,10 @@ def dbc_class(cls):
                     raise DbcViolation(i)
             except AttributeError:
                 pass
-
     cls.__setattr__ = __setattr__
 
-    orig__init__ = cls.__init__
-
-    @wraps(orig__init__, assigned=("__name__", "__doc__"))
-    def __init__(self, *args, **kwargs):
-        self.__invariants__ = []
-        self.__init_dbc__()
-        orig__init__(self, *args, **kwargs)
-    cls.__init__ = __init__
-
+    ####
+    # define and set the new __init_dbc__
     def __init_dbc__(self):
         soft_invariants = []
         # initialize invariants from all the way up the MRO
@@ -113,4 +107,17 @@ def dbc_class(cls):
                 setattr(self, name, dbc_function(getattr(self, name), self, soft_invariants))
     cls.__init_dbc__ = __init_dbc__
 
+    ####
+    # define and set the new __init__
+    orig__init__ = cls.__init__
+
+    @wraps(orig__init__, assigned=("__name__", "__doc__"))
+    def __init__(self, *args, **kwargs):
+        self.__invariants__ = []
+        self.__init_dbc__()
+        orig__init__(self, *args, **kwargs)
+    cls.__init__ = __init__
+
+    ####
+    # done, return the modified class
     return cls
