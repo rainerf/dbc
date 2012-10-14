@@ -19,7 +19,18 @@ class DbcViolation(Exception):
         return "DBC Constraint '%s' violated" % self.con
 
 
-def dbc_function(func, self=None, additional=None):
+def dbc(elem):
+    if inspect.isclass(elem):
+        return _dbc_class(elem)
+    elif inspect.ismethod(elem):
+        return _dbc_function(elem)
+    elif inspect.isfunction(elem):
+        return _dbc_function(elem)
+    else:
+        raise AttributeError("Argument must be a class, method or function!")
+
+
+def _dbc_function(func, self=None, additional=None):
     if additional is None:
         additional = []
 
@@ -72,7 +83,7 @@ def dbc_function(func, self=None, additional=None):
     return dbc_wrapper
 
 
-def dbc_class(cls):
+def _dbc_class(cls):
     ####
     # define and set the new __setattr__
     def __setattr__(self, name, value):
@@ -104,7 +115,7 @@ def dbc_class(cls):
         # initialize preconditions and postconditions
         for name, _ in inspect.getmembers(self, inspect.ismethod):
             if name != "__setattr__":
-                setattr(self, name, dbc_function(getattr(self, name), self, soft_invariants))
+                setattr(self, name, _dbc_function(getattr(self, name), self, soft_invariants))
     cls.__init_dbc__ = __init_dbc__
 
     ####
